@@ -1,0 +1,26 @@
+{
+  "name": "crypto-sniper-bot-cli",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "ethers": "^5.5.2",
+    "readline-sync": "^1.4.10"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OxMerc/crypto-sniper-bot-cli.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OxMerc/crypto-sniper-bot-cli/issues"
+  },
+  "homepage": "https://github.com/OxMerc/crypto-sniper-bot-cli#readme"
+}
