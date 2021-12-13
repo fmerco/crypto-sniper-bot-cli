@@ -1,7 +1,5 @@
-/* const ethers = require("ethers"); */
 import ethers from "ethers";
 import dotenv from "dotenv";
-/* const readlineSync = require("readline-sync"); */
 import * as readlineSync from "readline-sync";
 dotenv.config();
 
@@ -314,7 +312,6 @@ async function tokenApprove() {
   );
 }
 
-/*  FUNCTIONS */
 async function swapExactETHForTokens(
   factory,
   router,
