@@ -133,6 +133,8 @@ New pair detected
 token0: ${tok0}
 token1:  ${tok1}
 addressPair:  ${pairAdd}
+Date:  ${new Date()}
+
     `);
 
     if (tok0 === token || tok1 === token) {
@@ -200,7 +202,6 @@ addressPair:  ${pairAdd}
     }
   });
 }
-
 async function fastBuy() {
   console.log("FAST BUY STARTED");
 
@@ -241,7 +242,6 @@ async function fastBuy() {
     process.env.DECIMALS
   );
 }
-
 async function fastSell() {
   console.log("FAST SELL STARTED");
 
@@ -282,9 +282,8 @@ async function fastSell() {
     process.env.DECIMALS
   );
 }
-
 async function tokenApprove() {
-  console.log("FAST SELL STARTED");
+  console.log("APPROVE STARTED");
 
   const provider =
     process.env.RPC.indexOf("wss") >= 0
@@ -341,10 +340,14 @@ async function swapExactETHForTokens(
   );
   tx.wait()
     .then((resp) => {
-      console.log("Token purchased successfully! ;)");
+      console.log(`Token purchased successfully! ;)
+tx: ${resp.transactionHash}
+#############################################`);
     })
     .catch((err) => {
-      console.log("ERROR! Token purchase unsuccessful :(");
+      console.log(`ERROR! Token purchase unsuccessful :(
+tx: ${err.transactionHash}
+#############################################`);
     });
 }
 async function swapExactTokensForTokens(
@@ -375,10 +378,14 @@ async function swapExactTokensForTokens(
   );
   tx.wait()
     .then((resp) => {
-      console.log("Token purchased successfully! ;)");
+      console.log(`Token purchased successfully! ;)
+tx: ${resp.transactionHash}
+#############################################`);
     })
     .catch((err) => {
-      console.log("ERROR! Token purchase unsuccessful :(");
+      console.log(`ERROR! Token purchase unsuccessful :(
+tx: ${err.transactionHash}
+#############################################`);
     });
 }
 async function swapExactTokensForETH(
@@ -409,10 +416,14 @@ async function swapExactTokensForETH(
   );
   tx.wait()
     .then((resp) => {
-      console.log("Token sold successfully! ;)");
+      console.log(`Token sold successfully! ;)
+tx: ${resp.transactionHash}
+#############################################`);
     })
     .catch((err) => {
-      console.log("ERROR! Token sold unsuccessful :(");
+      console.log(`ERROR! Token sold unsuccessful :(
+tx: ${err.transactionHash}
+#############################################`);
     });
 }
 async function approve(
@@ -434,10 +445,14 @@ async function approve(
 
   tx.wait()
     .then((resp) => {
-      console.log("TOKEN APPROVED WITH SUCCESS! ");
+      console.log(`TOKEN APPROVED WITH SUCCESS! ;)
+tx: ${resp.transactionHash}
+#############################################`);
     })
     .catch((resp) => {
-      console.log("APPROVE ERROR!");
+      console.log(`APPROVE ERROR!
+tx: ${resp.transactionHash}
+#############################################`);
     });
 }
 
