@@ -118,7 +118,8 @@ async function pairCreatedListner() {
   const token = await readlineSync.question("Token to Snipe ( Address )");
 
   factory.on("PairCreated", async (token0, token1, pairAddress) => {
-    [token0, token1, pairAddress, token] = [
+    let tok0, tok1, pairAdd, tok;
+    [tok0, tok1, pairAdd, tok] = [
       token0.toUpperCase(),
       token1.toUpperCase(),
       pairAddress.toUpperCase(),
@@ -126,68 +127,68 @@ async function pairCreatedListner() {
     ];
 
     console.log(`
-    ~~~~~~~~~~~~~~~~~~
-    New pair detected
-    ~~~~~~~~~~~~~~~~~~
-    token0: ${token0}
-    token1:  ${token1}
-    addressPair:  ${pairAddress}
+~~~~~~~~~~~~~~~~~~
+New pair detected
+~~~~~~~~~~~~~~~~~~
+token0: ${tok0}
+token1:  ${tok1}
+addressPair:  ${pairAdd}
     `);
 
-    if (token0 === token || token1 === token) {
+    if (tok0 === token || tok1 === token) {
       console.log(`
       ::::::::::::::::::::::::::::::::::::::::::::::::
       PAIR FOUND!
       ::::::::::::::::::::::::::::::::::::::::::::::::
       `);
 
-      if (token0 === CONSTANTS.BNB_ADDRESS) {
+      if (tok0 === CONSTANTS.BNB_ADDRESS) {
         swapExactETHForTokens(
           factory,
           router,
           amountToBuy,
           amountOutMin,
-          token0,
-          token1,
+          tok0,
+          tok1,
           wallet.address,
           process.env.GAS_LIMIT,
           process.env.GAS_PRICE,
           process.env.DECIMALS
         );
-      } else if (token1 === CONSTANTS.BNB_ADDRESS) {
+      } else if (tok1 === CONSTANTS.BNB_ADDRESS) {
         swapExactETHForTokens(
           factory,
           router,
           amountToBuy,
           amountOutMin,
-          token1,
-          token0,
+          tok1,
+          tok0,
           wallet.address,
           process.env.GAS_LIMIT,
           process.env.GAS_PRICE,
           process.env.DECIMALS
         );
-      } else if (token0 === CONSTANTS.BUSD_ADDRESS) {
+      } else if (tok0 === CONSTANTS.BUSD_ADDRESS) {
         swapExactTokensForTokens(
           factory,
           router,
           amountToBuy,
           amountOutMin,
-          token0,
-          token1,
+          tok0,
+          tok1,
           wallet.address,
           process.env.GAS_LIMIT,
           process.env.GAS_PRICE,
           process.env.DECIMALS
         );
-      } else if (token1 === CONSTANTS.BUSD_ADDRESS) {
+      } else if (tok1 === CONSTANTS.BUSD_ADDRESS) {
         swapExactTokensForTokens(
           factory,
           router,
           amountToBuy,
           amountOutMin,
-          token1,
-          token0,
+          tok1,
+          tok0,
           wallet.address,
           process.env.GAS_LIMIT,
           process.env.GAS_PRICE,
@@ -302,7 +303,7 @@ async function tokenApprove() {
     account
   );
 
-  console.log('parseFloat(amountToBuy)', parseFloat(amountToBuy))
+  console.log("parseFloat(amountToBuy)", parseFloat(amountToBuy));
   approve(
     tokenContract,
     parseFloat(amountToBuy),
