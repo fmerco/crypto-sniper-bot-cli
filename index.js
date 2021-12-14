@@ -113,9 +113,9 @@ async function pairCreatedListner() {
     account
   );
 
-  const amountToBuy = await readlineSync.question("Amount to buy (BnB)");
-  const amountOutMin = await readlineSync.question("Amount Out Min (Tokens)");
-  const token = await readlineSync.question("Token to Snipe ( Address )");
+  const amountToBuy = await readlineSync.question("Amount to buy (BnB): ");
+  const amountOutMin = await readlineSync.question("Amount Out Min (Tokens): ");
+  const token = await readlineSync.question("Token to Snipe ( Address ): ");
 
   factory.on("PairCreated", async (token0, token1, pairAddress) => {
     let tok0, tok1, pairAdd, tok;
@@ -224,9 +224,9 @@ async function fastBuy() {
     account
   );
 
-  const amountToBuy = await readlineSync.question("Amount to buy (BnB)");
-  const amountOutMin = await readlineSync.question("Amount Out Min (Tokens)");
-  const token = await readlineSync.question("Token to buy ( Address )");
+  const amountToBuy = await readlineSync.question("Amount to buy (BnB): ");
+  const amountOutMin = await readlineSync.question("Amount Out Min (Tokens): ");
+  const token = await readlineSync.question("Token to buy ( Address ): ");
 
   swapExactETHForTokens(
     factory,
@@ -265,9 +265,9 @@ async function fastSell() {
     account
   );
 
-  const amountToBuy = await readlineSync.question("Amount to sell (Tokens)");
-  const amountOutMin = await readlineSync.question("Amount Out Min (BnB)");
-  const token = await readlineSync.question("Token to sell ( Address )");
+  const amountToBuy = await readlineSync.question("Amount to sell (Tokens): ");
+  const amountOutMin = await readlineSync.question("Amount Out Min (BnB): ");
+  const token = await readlineSync.question("Token to sell (Address): ");
 
   swapExactTokensForETH(
     factory,
@@ -303,7 +303,6 @@ async function tokenApprove() {
     account
   );
 
-  console.log("parseFloat(amountToBuy)", parseFloat(amountToBuy));
   approve(
     tokenContract,
     parseFloat(amountToBuy),
