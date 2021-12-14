@@ -58,7 +58,7 @@ const CONSTANTS = {
 };
 
 async function main() {
-  let choice = 1;
+  let choice;
   do {
     choice = await readlineSync.question(`
     :::::::::::::::::::::::::::::::::::::::
