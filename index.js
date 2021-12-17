@@ -68,6 +68,7 @@ async function main() {
     [2] BUY
     [3] SELL
     [4] SNIPER
+    [5] SNIPER V2
     `);
   } while (choice < 1 && choice > 4);
 
@@ -83,6 +84,9 @@ async function main() {
       break;
     case "4":
       await pairCreatedListner();
+      break;
+    case "5":
+      await pairPolling();
       break;
     default:
       console.log("No Choice");
@@ -310,7 +314,75 @@ async function tokenApprove() {
     process.env.DECIMALS
   );
 }
+async function pairPolling() {
+  console.log("Sniper V2 Started");
 
+  const provider =
+    process.env.RPC.indexOf("wss") >= 0
+      ? new ethers.providers.WebSocketProvider(process.env.RPC)
+      : new ethers.providers.JsonRpcProvider(process.env.RPC);
+
+  const wallet = new ethers.Wallet(process.env.PRIVATE_KEY);
+  const account = wallet.connect(provider);
+
+  const factory = new ethers.Contract(
+    CONSTANTS.FACTORY_ADDRESS,
+    CONSTANTS.FACTORY_ABI,
+    account
+  );
+
+  const router = new ethers.Contract(
+    CONSTANTS.ROUTER_ADDRESS,
+    CONSTANTS.ROUTER_ABI,
+    account
+  );
+
+  const ERC = new ethers.Contract(
+    CONSTANTS.BNB_ADDRESS,
+    CONSTANTS.ERC20_ABI,
+    account
+  );
+
+  const amountToBuy = await readlineSync.question("Amount to buy (BnB): ");
+  const amountOutMin = await readlineSync.question("Amount Out Min (Tokens): ");
+  const token = await readlineSync.question("Token to Snipe ( Address ): ");
+
+  if (await checkLiquidity(factory, ERC, CONSTANTS.BNB_ADDRESS, token)) {
+    console.log("START TRY TO BUY");
+    swapExactETHForTokens(
+      factory,
+      router,
+      amountToBuy,
+      amountOutMin,
+      CONSTANTS.BNB_ADDRESS,
+      token,
+      wallet.address, 
+      process.env.GAS_LIMIT,
+      process.env.GAS_PRICE,
+      process.env.DECIMALS
+    ); 
+  } 
+}
+
+async function checkLiquidity(factory, ERC, tokenToSpend, tokenToBuy) {
+  const pairAddress = await factory.getPair(tokenToSpend, tokenToBuy);
+  if (pairAddress != null) {
+    if (pairAddress.toString().indexOf("0x0000000000000") > -1) {
+      console.log("PAIR NOT DETECTED");
+      return await checkLiquidity(factory, ERC, tokenToSpend, tokenToBuy);
+    } 
+  } 
+  const pairBNBvalue = await ERC.balanceOf(pairAddress);
+  const pairBNBvalueFormatted = await ethers.utils.formatEther(pairBNBvalue);
+  console.log(`BnB Balance : ${pairBNBvalueFormatted}`);
+
+  if (parseFloat(pairBNBvalueFormatted) > parseFloat(1)) { 
+    return true;
+  } else {
+    console.log("Retry ...");
+    return await checkLiquidity(factory, ERC, tokenToSpend, tokenToBuy);
+  }
+}
 async function swapExactETHForTokens(
   factory,
   router,
