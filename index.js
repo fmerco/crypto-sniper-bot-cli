@@ -61,16 +61,16 @@ async function main() {
   let choice;
   do {
     choice = await readlineSync.question(`
-    :::::::::::::::::::::::::::::::::::::::
-    What do you want to do?
-    :::::::::::::::::::::::::::::::::::::::
-    [1] APPROVE
-    [2] BUY
-    [3] SELL
-    [4] SNIPER
-    [5] SNIPER V2
+:::::::::::::::::::::::::::::::::::::::
+What do you want to do?
+:::::::::::::::::::::::::::::::::::::::
+[1] APPROVE
+[2] BUY
+[3] SELL
+[4] SNIPER
+[5] SNIPER V2
     `);
-  } while (choice < 1 && choice > 4);
+  } while (Number.parseInt(choice) < 1 || Number.parseInt(choice) > 5);
 
   switch (choice) {
     case "1":
@@ -229,22 +229,54 @@ async function fastBuy() {
     account
   );
 
-  const amountToBuy = await readlineSync.question("Amount to buy (BnB): ");
+  let choice;
+  do {
+    choice = await readlineSync.question(`
+Do you want spend BnB or BUSD?
+[1] BnB
+[2] BUSD
+    `);
+  } while (Number.parseInt(choice) < 1 || Number.parseInt(choice) > 2);
+
+  const tokenLabel = choice == 1 ? '(BnB)' : '(BUSD)';
+  const amountToBuy = await readlineSync.question(`Amount to buy ${tokenLabel}: `);
   const amountOutMin = await readlineSync.question("Amount Out Min (Tokens): ");
   const token = await readlineSync.question("Token to buy ( Address ): ");
+ 
+  switch (choice) {
+    case '1':
+      swapExactETHForTokens(
+        factory,
+        router,
+        amountToBuy,
+        amountOutMin,
+        CONSTANTS.BNB_ADDRESS,
+        token,
+        wallet.address,
+        process.env.GAS_LIMIT,
+        process.env.GAS_PRICE,
+        process.env.DECIMALS
+      );
+      break;
+      case '2':
+        swapExactBUSDForTokens(
+          factory,
+          router, 
+          amountToBuy,
+          amountOutMin,
+          CONSTANTS.BUSD_ADDRESS,
+          token,
+          wallet.address,
+          process.env.GAS_LIMIT,
+          process.env.GAS_PRICE,
+          process.env.DECIMALS
+        );
+      break;
+    default:
+      console.log('Error! No Choice')
+      break;
+  }
 
-  swapExactETHForTokens(
-    factory,
-    router,
-    amountToBuy,
-    amountOutMin,
-    CONSTANTS.BNB_ADDRESS,
-    token,
-    wallet.address,
-    process.env.GAS_LIMIT,
-    process.env.GAS_PRICE,
-    process.env.DECIMALS
-  );
 }
 async function fastSell() {
   console.log("FAST SELL STARTED");
@@ -269,22 +301,53 @@ async function fastSell() {
     account
   );
 
-  const amountToBuy = await readlineSync.question("Amount to sell (Tokens): ");
-  const amountOutMin = await readlineSync.question("Amount Out Min (BnB): ");
+  let choice;
+  do {
+    choice = await readlineSync.question(`
+Do you want receive BnB or BUSD?
+[1] BnB
+[2] BUSD
+`);
+  } while (Number.parseInt(choice) < 1 || Number.parseInt(choice) > 2);
+
+  const tokenLabel = choice == 1 ? '(BnB)' : '(BUSD)';
+  const amountToSell = await readlineSync.question("Amount to sell (Tokens): ");
+  const amountOutMin = await readlineSync.question(`Amount Out Min ${tokenLabel}: `);
   const token = await readlineSync.question("Token to sell (Address): ");
 
-  swapExactTokensForETH(
-    factory,
-    router,
-    amountToBuy,
-    amountOutMin,
-    token,
-    CONSTANTS.BNB_ADDRESS,
-    wallet.address,
-    process.env.GAS_LIMIT,
-    process.env.GAS_PRICE,
-    process.env.DECIMALS
-  );
+  switch (choice) {
+    case '1':
+      swapExactTokensForETH(
+        factory,
+        router,
+        amountToSell,
+        amountOutMin,
+        token,
+        CONSTANTS.BNB_ADDRESS,
+        wallet.address,
+        process.env.GAS_LIMIT,
+        process.env.GAS_PRICE,
+        process.env.DECIMALS
+      );
+      break;
+      case '2':
+        swapExactTokensForBUSD(
+          factory,
+          router,
+          amountToSell,
+          amountOutMin,
+          token,
+          CONSTANTS.BUSD_ADDRESS,
+          wallet.address,
+          process.env.GAS_LIMIT,
+          process.env.GAS_PRICE,
+          process.env.DECIMALS
+        );
+      break;
+    default:
+      console.log('Error! No Choice')
+      break;
+  }
 }
 async function tokenApprove() {
   console.log("APPROVE STARTED");
@@ -397,9 +460,8 @@ async function swapExactETHForTokens(
 ) {
   const amountIn = ethers.utils.parseUnits(amountToBuy, "ether");
   console.log("SwapExactETHForTokens start ... ");
-
   const tx = await router.swapExactETHForTokens(
-    `${amountOutMin * 10 ** decimals}`,
+    `${ethers.utils.parseUnits(amountOutMin.toString(), decimals)}`,
     [tokenIn, tokenOut],
     recipient,
     Date.now() + 1000 * 60 * 5, //5 minutes
@@ -435,10 +497,88 @@ async function swapExactTokensForTokens(
   decimals
 ) {
   console.log("swapExactTokensForTokens start ... ");
-  const amountIn = amountToBuy * 600 * 10 ** 18;
+  const amountIn = ethers.utils.parseUnits( (process.env.BNB_PRICE * amountToBuy).toString(), decimals);
   const tx = await router.swapExactTokensForTokens(
     `${amountIn}`,
-    `${amountOutMin * 10 ** decimals}`,
+    `${ethers.utils.parseUnits(amountOutMin.toString(), decimals)}`,
+    [tokenIn, tokenOut],
+    recipient,
+    Date.now() + 1000 * 60 * 5,
+    {
+      gasLimit: gasLimit,
+      gasPrice: ethers.utils.parseUnits(`${gasPrice}`, "gwei"),
+      nonce: null,
+    }
+  );
+  tx.wait()
+    .then((resp) => {
+      console.log(`Token purchased successfully! ;)
+tx: ${resp.transactionHash}
+#############################################`);
+    })
+    .catch((err) => {
+      console.log(`ERROR! Token purchase unsuccessful :(
+tx: ${err.transactionHash}
+#############################################`);
+    });
+}
+async function swapExactTokensForBUSD(
+  factory,
+  router,
+  amountToSell,
+  amountOutMin,
+  tokenIn,
+  tokenOut,
+  recipient,
+  gasLimit,
+  gasPrice,
+  decimals
+) {
+  console.log("swapExactTokensForBUSD start ... ");
+  const amountIn = ethers.utils.parseUnits(amountToSell.toString(), decimals);
+
+  const tx = await router.swapExactTokensForTokens(
+    `${amountIn}`,
+    `${ethers.utils.parseUnits(amountOutMin.toString(), 18)}`,
+    [tokenIn, tokenOut],
+    recipient,
+    Date.now() + 1000 * 60 * 5,
+    {
+      gasLimit: gasLimit,
+      gasPrice: ethers.utils.parseUnits(`${gasPrice}`, "gwei"),
+      nonce: null,
+    }
+  );
+  tx.wait()
+    .then((resp) => {
+      console.log(`Token sold successfully! ;)
+tx: ${resp.transactionHash}
+#############################################`);
+    })
+    .catch((err) => {
+      console.log(`ERROR! Token sold unsuccessful :(
+tx: ${err.transactionHash}
+#############################################`);
+    });
+}
+async function swapExactBUSDForTokens(
+  factory,
+  router,
+  amountToBuy,
+  amountOutMin,
+  tokenIn,
+  tokenOut,
+  recipient,
+  gasLimit,
+  gasPrice,
+  decimals
+) {
+  console.log("swapExactBUSDForTokens start ... ");
+  const amountIn = ethers.utils.parseUnits(amountToBuy.toString(), decimals);
+
+  const tx = await router.swapExactTokensForTokens(
+    `${amountIn}`,
+    `${ethers.utils.parseUnits(amountOutMin.toString(), decimals)}`,
     [tokenIn, tokenOut],
     recipient,
     Date.now() + 1000 * 60 * 5,
@@ -473,7 +613,7 @@ async function swapExactTokensForETH(
   decimals
 ) {
   console.log("swapExactTokensForETH start ... ");
-  const amountIn = amountToBuy * 10 ** decimals;
+  const amountIn = ethers.utils.parseUnits(amountToBuy.toString(), decimals);;
   const tx = await router.swapExactTokensForETH(
     `${amountIn}`,
     `${ethers.utils.parseUnits(`${amountOutMin}`, "ether")}`,
@@ -505,9 +645,10 @@ async function approve(
   gasPrice,
   decimals
 ) {
+  
   const tx = await tokenContract.approve(
     CONSTANTS.ROUTER_ADDRESS,
-    `${amountToBuy * 10 ** decimals}`,
+    `${ethers.utils.parseUnits(amountToBuy.toString(), decimals)}`,
     {
       gasLimit: `${gasLimit}`,
       gasPrice: ethers.utils.parseUnits(`${gasPrice}`, "gwei"),
