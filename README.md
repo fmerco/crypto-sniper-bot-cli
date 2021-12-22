@@ -19,5 +19,7 @@ You will find four choices available:
     [2] BUY
     [3] SELL
     [4] SNIPER
+    [5] SNIPER V2
+
 
 using the keyboard choose the functionality and follow the instructions that will be given to you
